@@ -1,7 +1,8 @@
-#ifndef PI_REGULATOR_H
-#define PI_REGULATOR_H
+#ifndef PROCESS_IMAGE_H
+#define PROCESS_IMAGE_H
 
-//start the PI regulator thread
-void pi_regulator_start(void);
+float get_distance_cm(void);
+uint16_t get_line_position(void);
+void process_image_start(void);
 
-#endif /* PI_REGULATOR_H */
+#endif /* PROCESS_IMAGE_H */
