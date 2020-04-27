@@ -98,11 +98,11 @@ bool green_light(uint8_t *red, uint8_t *green, uint8_t *blue, bool previous_stat
 
 //checks if a light is turned on in the right side of the captured line
 uint8_t get_light(uint8_t *red, uint8_t *green, uint8_t *blue, uint8_t mov){
-	uint8_t red_pxl=0, blue_val, green_val; // green_pxl=0;
+	uint8_t red_pxl=0;// blue_val, green_val; // green_pxl=0;
 
 	//To look for light only in the second half of the line
 	for(uint16_t i= IMAGE_BUFFER_SIZE/2; i< IMAGE_BUFFER_SIZE;i++){
-		if(green[i] < 5 ){
+		if(blue[i] > 20 ){
 			red_pxl+=1;
 			if(red_pxl==50){
 				return MOV_STOP;
@@ -258,11 +258,14 @@ static THD_FUNCTION(ProcessImage, arg) {
 			//red : extracts first 5bits of the first byte, put them to the right.
         	red_ctr[i/2] = ((uint8_t)img_ctr_buff_ptr[i]&0xF8)>>3;
         	//green : extracts last 3 bits of the first byte, put them to the left then add the first 3 bits of the second byte shifted to the right.
-        	green_ctr[i/2] = (((uint8_t)img_ctr_buff_ptr[i]&0x07)<<3) + (((uint8_t)img_ctr_buff_ptr[i+1]&0xE0)>>5);
-        	//blue : extracts last 5 bits of the second byte.
-        	blue_ctr[i/2] = (uint8_t)img_ctr_buff_ptr[i+1]&0x1F;
-		}
+        	//green_ctr[i/2] = (uint8_t)(((uint8_t)img_ctr_buff_ptr[i]&0x07)<<3) + (((uint8_t)img_ctr_buff_ptr[i+1]&0xE0)>>5);
 
+		}
+		for(uint16_t i = 1 ; i < (2 * IMAGE_BUFFER_SIZE-1) ; i+=2){
+			//blue : extracts last 5 bits of the second byte.
+        	blue_ctr[(i-1)/2] = (uint8_t)((uint8_t)img_ctr_buff_ptr[i]&0x1F);
+
+		}
 
 		//search for a line in the image and gets its width in pixels
 		lineWidth = extract_line_width(red_ctr);
