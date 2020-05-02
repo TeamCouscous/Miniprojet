@@ -12,7 +12,8 @@
 #include <camera/po8030.h>
 #include <chprintf.h>
 
-#include <pi_regulator.h>
+#include <move_car.h>
+#include <LED_manager.h>
 #include <process_image.h>
 
 void SendUint8ToComputer(uint8_t* data, uint16_t size) 
@@ -52,8 +53,9 @@ int main(void)
 	motors_init();
 
 	//stars the threads for the pi regulator and the processing of the image
-	pi_regulator_start();
+	move_car_start();
 	process_image_start();
+	led_manager_start();
 
     /* Infinite loop. */
     while (1) {

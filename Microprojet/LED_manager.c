@@ -21,14 +21,15 @@ static THD_FUNCTION(LedManager, arg) {
         movement = get_movement();
         if(movement == MOV_STOP)
         {
-        	set_body_led(1);
-        	set_front_led(0);
+        	set_body_led(0);
+        	set_front_led(1);
+        	//set_led(LED5, 1); //set back led (red)
         }
 
         else if(movement == MOV_CONTINUE || movement == MOV_START)
         {
-        	set_front_led(1);
-			set_body_led(0);
+        	set_front_led(0);
+			set_body_led(1);
         }
     }
 
