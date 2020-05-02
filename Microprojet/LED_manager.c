@@ -16,7 +16,22 @@ static THD_FUNCTION(LedManager, arg) {
     
     uint8_t movement;
     
-    movement = get_movement();
+    while(1)
+    {
+        movement = get_movement();
+        if(movement == MOV_STOP)
+        {
+        	set_body_led(1);
+        	set_front_led(0);
+        }
+
+        else if(movement == MOV_CONTINUE || movement == MOV_START)
+        {
+        	set_front_led(1);
+			set_body_led(0);
+        }
+    }
+
 }
 
 void led_manager_start(void){
