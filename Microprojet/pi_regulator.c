@@ -11,7 +11,7 @@
 #include <process_image.h>
 
 //simple PI regulator implementation
-int16_t pi_regulator(float distance, float goal){
+/*int16_t pi_regulator(float distance, float goal){
 
 	float error = 0;
 	float speed = 0;
@@ -39,7 +39,7 @@ int16_t pi_regulator(float distance, float goal){
 	speed = KP * error + KI * sum_error;
 
     return (int16_t)speed;
-}
+}*/
 
 static THD_WORKING_AREA(waPiRegulator, 256);
 static THD_FUNCTION(PiRegulator, arg) {
@@ -51,6 +51,7 @@ static THD_FUNCTION(PiRegulator, arg) {
 
     int16_t speed = 0;
     int16_t speed_correction = 0;
+    uint8_t movement = MOV_STOP;
 
     while(1){
         time = chVTGetSystemTime();
@@ -60,18 +61,22 @@ static THD_FUNCTION(PiRegulator, arg) {
         //speed = pi_regulator(get_distance_cm(), GOAL_DISTANCE);
         //computes a correction factor to let the robot rotate to be in front of the line
 
+        movement = get_movement();
+        if(movement == MOV_START || movement == MOV_CONTINUE)
+        {
 
-        speed = 10;
-        speed_correction = (get_line_position() - (IMAGE_BUFFER_SIZE/2));
+			speed = 10;
+			speed_correction = (get_line_position() - (IMAGE_BUFFER_SIZE/2));
 
-        //if the line is nearly in front of the camera, don't rotate
-        if(abs(speed_correction) < ROTATION_THRESHOLD){
-        	speed_correction = 0;
+			//if the line is nearly in front of the camera, don't rotate
+			if(abs(speed_correction) < ROTATION_THRESHOLD){
+				speed_correction = 0;
+			}
+
+			//applies the speed from the PI regulator and the correction for the rotation
+			right_motor_set_speed(speed - ROTATION_COEFF * speed_correction);
+			left_motor_set_speed(speed + ROTATION_COEFF * speed_correction);
         }
-
-        //applies the speed from the PI regulator and the correction for the rotation
-		right_motor_set_speed(speed - ROTATION_COEFF * speed_correction);
-		left_motor_set_speed(speed + ROTATION_COEFF * speed_correction);
 
         //100Hz
         chThdSleepUntilWindowed(time, time + MS2ST(10));
