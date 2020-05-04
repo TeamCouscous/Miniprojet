@@ -20,64 +20,53 @@ static THD_FUNCTION(MoveCar, arg) {
 
     systime_t time;
 
-    int16_t speed = 0;
+    int16_t speed;
     int16_t speed_correction = 0;
+    uint8_t count_no_line=0;
 
     while(1){
         time = chVTGetSystemTime();
-
-        //computes the speed to give to the motors
         speed=400;
 
-        /*
-		//applies the correction for the rotation
-		if(get_movement()!=MOV_STOP){
-	   	   	   right_motor_set_speed(speed - ROTATION_COEFF * speed_correction);
-	   	   	   left_motor_set_speed(speed + ROTATION_COEFF * speed_correction);
-		}else{
-			right_motor_set_speed(0);
-			left_motor_set_speed(0);
-		}*/
 
-        if(get_line_position()<IMAGE_BUFFER_SIZE && get_line_position()>0){
+        //if(!get_proximity_on()){
+        if(get_line_position()<IMAGE_BUFFER_SIZE && get_line_position()>0){	//&& get_movement()!=MOV_STOP
         			speed_correction = (get_line_position()- (IMAGE_BUFFER_SIZE/2));
         			//if the line is nearly in front of the camera, don't rotate
         			if(abs(speed_correction) < ROTATION_THRESHOLD){
 		        	speed_correction = 0;
         			}
-
+        			//speed=set_speed(count_speed);
         			right_motor_set_speed(speed - ROTATION_COEFF * speed_correction);
         			left_motor_set_speed(speed + ROTATION_COEFF * speed_correction);
-        			k=0;
+        			count_no_line=0;
         }else{
-        	if(k<50)
-        	{
-        		right_motor_set_speed(speed - ROTATION_COEFF * speed_correction);
-        		left_motor_set_speed(speed + ROTATION_COEFF * speed_correction);
-        		k++;
-        	}else{
-        		right_motor_set_speed(0);
-        		left_motor_set_speed(0);
+        	right_motor_set_speed(0);
+        	left_motor_set_speed(0);
+        	count_no_line++;
+        	if(count_no_line>50){ //turn left until finds line
+        	    right_motor_set_speed(-200);
+        	    left_motor_set_speed(200);
         	}
         }
-        		/*
-		for(uint16_t i=0; i<49;i++)
-		{
-			line_position[i]=line_position[i+1];
-		}
-		line_position[49] = get_line_position();*/
-        	// chprintf((BaseSequentialStream *)&SD3, "linewidth = %d\n",lineWidth);
-
-
-
-
-
-
+        //}
 
         //100Hz
         chThdSleepUntilWindowed(time, time + MS2ST(10));
     }
 }
+
+//sets speed from 4 (=MAX_SPEED/MAX_COUNTER) to 400 (=MAX_SPEED) steps/s depending on the counter value and stays at MAX_SPEED
+uint16_t set_speed(uint8_t counter){
+	//if counter equals MAX_COUNTER or exceeds this value
+	if(counter == MAX_COUNTER){
+		return MAX_SPEED;
+	}else{
+		counter++;
+		return counter*(MAX_SPEED/MAX_COUNTER);
+	}
+}
+
 
 void move_car_start(void){
 	chThdCreateStatic(waMoveCar, sizeof(waMoveCar), NORMALPRIO, MoveCar, NULL);

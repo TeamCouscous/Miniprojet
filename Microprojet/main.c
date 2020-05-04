@@ -17,6 +17,10 @@
 #include <process_image.h>
 #include <proximity_sensor.h>
 
+messagebus_t bus;
+MUTEX_DECL(bus_lock);
+CONDVAR_DECL(bus_condvar);
+
 void SendUint8ToComputer(uint8_t* data, uint16_t size) 
 {
 	chSequentialStreamWrite((BaseSequentialStream *)&SD3, (uint8_t*)"START", 5);
@@ -52,6 +56,7 @@ int main(void)
     //starts the camera
     dcmi_start();
 	po8030_start();
+	//po8030_set_contrast(150);
 	po8030_set_awb(0);
 	//inits the motors
 	motors_init();

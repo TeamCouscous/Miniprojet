@@ -17,86 +17,6 @@ static uint16_t linePosition;
 
 //semaphore
 static BSEMAPHORE_DECL(image_ready_sem, TRUE);
-static BSEMAPHORE_DECL(img_center_ready_sem, TRUE);
-static BSEMAPHORE_DECL(img_bottom_ready_sem, TRUE);
-static BSEMAPHORE_DECL(img_capture, TRUE);
-/*
- *  Returns the line's width extracted from the image buffer given
- *  Returns 0 if line not found
- */
-/*
-bool green_square(uint16_t i, uint8_t *red, uint8_t *green, uint8_t *blue)
-{
-	uint8_t j=i;
-	uint8_t pxl_count = 0;
-
-	while(pxl_count <9)
-	{
-		if(green[j]> 4*(blue[j]+red[j]) && green[j] > 20)
-		{
-			pxl_count ++;
-
-			if(pxl_count == 9)
-				return true;
-
-			else if(pxl_count == 3 || pxl_count == 6)
-				j = j+18;
-
-			else
-				j=j+1;
-		}
-
-		else
-			return false;
-	}
-	return false;
-}
-
-
-bool red_square(uint16_t i, uint8_t *red, uint8_t *green, uint8_t *blue)
-{
-	uint8_t j=i;
-	uint8_t pxl_count = 0;
-
-	while(pxl_count < 9)
-	{
-		if(red[j] > 2*(green[j]/2+blue[j]) && red[j]>10)
-		{
-			pxl_count ++;
-
-			if(pxl_count == 9)
-				return true;
-
-			else if(pxl_count == 3 || pxl_count == 6)
-				j = j+18;
-
-			else
-				j=j+1;
-		}
-
-		else
-			return false;
-	}
-	return false;
-}
-
-
-bool green_light(uint8_t *red, uint8_t *green, uint8_t *blue, bool previous_state)
-{
-	//search for a green/red square of at least 3x3 pixels ?
-	for(uint16_t i=0; i<400; i++)
-	{
-		//light detection, to adjust
-		if(red_square(i, red, green, blue))
-			return false;
-
-		else if(green_square(i, red, green, blue))
-			return true;
-
-		else
-			return previous_state;
-	}
-}*/
 
 //checks if a light is turned on in the right side of the captured line
 uint8_t get_light(uint8_t *red, uint8_t *green, uint8_t *blue){
@@ -173,7 +93,7 @@ uint16_t search_line_position(uint8_t *buffer){
 		    //if an end was not found
 		    if (i > IMAGE_BUFFER_SIZE || !end)
 		    {
-		        line_not_found = 1;
+		    	end=IMAGE_BUFFER_SIZE;
 		    }
 		}
 		else//if no begin was found
@@ -257,25 +177,16 @@ static THD_FUNCTION(ProcessImage, arg) {
         	blue[i/2] = (uint8_t)((uint8_t)img_ctr_buff_ptr[i+1]&0x1F);
         	//green : extracts last 3 bits of the first byte, put them to the left then add the first 3 bits of the second byte shifted to the right.
         	green[i/2] = (uint8_t)(((uint8_t)img_ctr_buff_ptr[i]&0x07)<<3) + (((uint8_t)img_ctr_buff_ptr[i+1]&0xE0)>>5);
+        	//clr_intensity
+        	 clr_intensity[i/2]=2*(red[i/2]+blue[i/2])+green[i/2];
 		}
-		/*img_bot_buff_ptr = dcmi_get_last_image_ptr();
-		for(uint16_t i = 1 ; i < (2 * IMAGE_BUFFER_SIZE-1) ; i+=2){
-					//blue : extracts last 5 bits of the second byte.
-		        	blue_ctr[(i-1)/2] = (uint8_t)((uint8_t)img_bot_buff_ptr[i]&0x1F);
 
-				}
-
-		*/
 		//search for a line in the image and gets its width in pixels
-		linePosition = search_line_position(red);
+		linePosition = search_line_position(clr_intensity);
 
 		//search for light
 		movement=get_light(red,green,blue);
 
-		//converts the width into a distance between the robot and the camera
-		/*if(lineWidth){
-			distance_cm = PXTOCM/lineWidth;
-		}*/
 
 		/*if(send_to_computer){
 			//sends to the computer the image
@@ -296,9 +207,6 @@ static THD_FUNCTION(ProcessImage, arg) {
     }
 }
 
-/*float get_distance_cm(void){
-	return distance_cm;
-}*/
 
 uint8_t get_movement(void){
 	return movement;
