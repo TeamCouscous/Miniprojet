@@ -26,6 +26,9 @@ extern "C" {
 #define MOV_START				1
 #define MOV_STOP				0
 #define MOV_CONTINUE			2
+#define PROXIMITY_MAX			200
+#define MAX_COUNTER				100
+#define MAX_SPEED				400
 
 /** Robot wide IPC bus. */
 extern messagebus_t bus;

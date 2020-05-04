@@ -15,6 +15,7 @@
 #include <move_car.h>
 #include <LED_manager.h>
 #include <process_image.h>
+#include <proximity_sensor.h>
 
 void SendUint8ToComputer(uint8_t* data, uint16_t size) 
 {
@@ -42,6 +43,8 @@ int main(void)
     chSysInit();
     mpu_init();
 
+    messagebus_init(&bus, &bus_lock,&bus_condvar);
+
     //starts the serial communication
     serial_start();
     //start the USB communication
@@ -49,6 +52,7 @@ int main(void)
     //starts the camera
     dcmi_start();
 	po8030_start();
+	po8030_set_awb(0);
 	//inits the motors
 	motors_init();
 
@@ -56,6 +60,7 @@ int main(void)
 	move_car_start();
 	process_image_start();
 	led_manager_start();
+	proximity_sensor_start();
 
     /* Infinite loop. */
     while (1) {
