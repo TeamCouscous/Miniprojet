@@ -61,6 +61,9 @@ int main(void)
 	//inits the motors
 	motors_init();
 
+	//starts the proximity sensor
+	proximity_start();
+
 	//stars the threads for the pi regulator and the processing of the image
 	move_car_start();
 	process_image_start();

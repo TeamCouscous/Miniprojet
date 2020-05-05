@@ -152,7 +152,7 @@ static THD_FUNCTION(ProcessImage, arg) {
 
 	uint8_t *img_ctr_buff_ptr;
 	//uint8_t *img_bot_buff_ptr;
-	//uint8_t clr_intensity[IMAGE_BUFFER_SIZE] = {0};
+	uint8_t clr_intensity[IMAGE_BUFFER_SIZE] = {0};
 	uint8_t red[IMAGE_BUFFER_SIZE] = {0};
 	uint8_t green[IMAGE_BUFFER_SIZE] = {0};
 	uint8_t blue[IMAGE_BUFFER_SIZE] = {0};

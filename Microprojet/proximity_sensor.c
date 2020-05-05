@@ -18,10 +18,9 @@ static THD_FUNCTION(ProximitySensor, arg) {
     (void)arg;
 
     while(1){
-    	proximity_start();
     	//calibrate_ir();
     	bool prox_on=0;
-    	for(uint16_t  i=0;i<4;i++){ //PROXIMITY_NB_CHANNELS
+    	for(uint16_t  i=0; i<PROXIMITY_NB_CHANNELS; i++){
     		if(get_prox(i)> PROXIMITY_MAX){
     			prox_on=1;
     		}

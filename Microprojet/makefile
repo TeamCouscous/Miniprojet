@@ -13,6 +13,7 @@ CSRC += ./main.c \
 		./move_car.c \
 		./process_image.c\
 		./LED_manager.c\
+		./proximity_sensor.c\
 
 #Header folders to include
 INCDIR += 
