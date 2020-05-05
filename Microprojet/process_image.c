@@ -156,6 +156,7 @@ static THD_FUNCTION(ProcessImage, arg) {
 	uint8_t red[IMAGE_BUFFER_SIZE] = {0};
 	uint8_t green[IMAGE_BUFFER_SIZE] = {0};
 	uint8_t blue[IMAGE_BUFFER_SIZE] = {0};
+	uint8_t clr_intensity[IMAGE_BUFFER_SIZE] ={0};
 
 
 	//uint16_t lineWidth = 0;
@@ -178,7 +179,7 @@ static THD_FUNCTION(ProcessImage, arg) {
         	//green : extracts last 3 bits of the first byte, put them to the left then add the first 3 bits of the second byte shifted to the right.
         	green[i/2] = (uint8_t)(((uint8_t)img_ctr_buff_ptr[i]&0x07)<<3) + (((uint8_t)img_ctr_buff_ptr[i+1]&0xE0)>>5);
         	//clr_intensity
-        	 clr_intensity[i/2]=2*(red[i/2]+blue[i/2])+green[i/2];
+        	clr_intensity[i/2]=2*(red[i/2]+blue[i/2])+green[i/2];
 		}
 
 		//search for a line in the image and gets its width in pixels

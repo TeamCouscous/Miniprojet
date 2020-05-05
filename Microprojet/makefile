@@ -12,6 +12,7 @@ GLOBAL_PATH = ../../lib/e-puck2_main-processor
 CSRC += ./main.c \
 		./move_car.c \
 		./process_image.c\
+
 		./LED_manager.c\
 		./proximity_sensor.c\
 

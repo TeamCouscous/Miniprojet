@@ -29,6 +29,7 @@ extern "C" {
 #define PROXIMITY_MAX			200
 #define MAX_COUNTER				100
 #define MAX_SPEED				400
+#define G_COEFF					1
 
 /** Robot wide IPC bus. */
 extern messagebus_t bus;

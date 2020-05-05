@@ -16,6 +16,8 @@
 #include <LED_manager.h>
 #include <process_image.h>
 #include <proximity_sensor.h>
+#include <i2c_bus.h>
+#include <sensors/imu.h>
 
 messagebus_t bus;
 MUTEX_DECL(bus_lock);
@@ -61,9 +63,10 @@ int main(void)
 	//inits the motors
 	motors_init();
 
+
 	//starts the proximity sensor
 	proximity_start();
-
+	i2c_start();
 	//stars the threads for the pi regulator and the processing of the image
 	move_car_start();
 	process_image_start();
