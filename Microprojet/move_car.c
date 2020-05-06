@@ -14,7 +14,6 @@
 #include <msgbus/messagebus.h>
 #include <i2c_bus.h>
 
-static uint8_t select_state;
 
 static THD_WORKING_AREA(waMoveCar, 4096);
 static THD_FUNCTION(MoveCar, arg) {
@@ -25,38 +24,35 @@ static THD_FUNCTION(MoveCar, arg) {
     systime_t time;
 
     int16_t speed;
+    int16_t speed_m =0;
     int16_t speed_correction = 0;
     uint8_t count_no_line=0;
+    uint8_t old_select = 0;
 
-    //messagebus_topic_t *imu_topic = messagebus_find_topic_blocking(&bus, "/imu");
-    //imu_msg_t imu_values;
+    uint8_t select_state=0;
+    uint8_t count_speed=0;;
+
     float gravity_compensation;
     calibrate_acc();
 
     while(1){
         time = chVTGetSystemTime();
-        speed=400;
-        select_state = get_selector();
 
-        //messagebus_topic_wait(imu_topic, &imu_values, sizeof(imu_values));
 
         gravity_compensation = get_acceleration(Y_AXIS)*G_COEFF;
 
-        if(!select_state){
-			right_motor_set_speed(BACKWARD_SPEED);
-			left_motor_set_speed(BACKWARD_SPEED);
-        }
 
-        else{
 
         	//if(!get_proximity_on()){ //&& get_movement()!=MOV_STOP
         	if(get_line_position()<IMAGE_BUFFER_SIZE && get_line_position()>0){	//&& get_movement()!=MOV_STOP
+        				speed_m = change_speed(speed_m,select_state);
+
         				speed_correction = (get_line_position()- (IMAGE_BUFFER_SIZE/2));
         				//if the line is nearly in front of the camera, don't rotate
         				if(abs(speed_correction) < ROTATION_THRESHOLD){
         					speed_correction = 0;
         				}
-        				//speed=set_speed(count_speed);
+        				speed=set_speed(speed_m, count_speed);
         				right_motor_set_speed(speed - ROTATION_COEFF * speed_correction);
         				left_motor_set_speed(speed + ROTATION_COEFF * speed_correction);
         				count_no_line=0;
@@ -65,32 +61,55 @@ static THD_FUNCTION(MoveCar, arg) {
         		left_motor_set_speed(0);
         		count_no_line++;
         		if(count_no_line>50){ //turn left until finds line
+        			count_speed=0;
         			right_motor_set_speed(-200);
         			left_motor_set_speed(200);
         		}
         	}
-        }
+
         //}
         /*
         if(gravity_compensation<400 && gravity_compensation>-400){
         	  right_motor_set_speed(speed+gravity_compensation);
         	  left_motor_set_speed(speed+gravity_compensation);
         }*/
-        //chprintf((BaseSequentialStream *)&SD3, "gravity = %f\n",gravity_compensation);
+        chprintf((BaseSequentialStream *)&SD3, "select state = %d\n",select_state);
         //100Hz
         chThdSleepUntilWindowed(time, time + MS2ST(10));
     }
 }
 
 //sets speed from 4 (=MAX_SPEED/MAX_COUNTER) to 400 (=MAX_SPEED) steps/s depending on the counter value and stays at MAX_SPEED
-uint16_t set_speed(uint8_t counter){
+int16_t set_speed(int16_t speed_max, uint8_t counter){
 	//if counter equals MAX_COUNTER or exceeds this value
 	if(counter == MAX_COUNTER){
-		return MAX_SPEED*(select_state/15);
+		return speed_max;
 	}else{
 		counter++;
-		return counter*(MAX_SPEED/MAX_COUNTER)*(select_state/15);
+		return counter*(speed_max/MAX_COUNTER);
 	}
+}
+
+int16_t change_speed(int16_t speed_max, uint8_t select_state)
+{
+	uint8_t old_select = select_state;
+	select_state = get_selector();
+	int8_t dif = select_state - old_select;
+	if(!dif)
+		return speed_max;
+
+	else if((dif>1 && dif<8) || dif<-8)
+		speed_max+=200;
+
+	else if((dif<-1 && dif>-8) || dif>8)
+		speed_max-=200;
+
+	if(speed_max > MAX_SPEED)
+		return MAX_SPEED;
+	else if(speed_max < BACKWARD_SPEED)
+		return BACKWARD_SPEED;
+	else
+		return speed_max;
 }
 
 
