@@ -212,9 +212,9 @@ uint8_t get_movement(void){
 }
 
 uint8_t get_turning(void){
-	if(linePosition-IMAGE_BUFFER_SIZE > BLINKING_THRESHOLD)
+	if(linePosition-IMAGE_BUFFER_SIZE/2 > BLINKING_THRESHOLD)
 		return RIGHT;
-	else if(IMAGE_BUFFER_SIZE-linePosition > BLINKING_THRESHOLD)
+	else if(IMAGE_BUFFER_SIZE/2-linePosition > BLINKING_THRESHOLD)
 		return LEFT;
 	else
 		return NO;

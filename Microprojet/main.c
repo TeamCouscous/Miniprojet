@@ -74,7 +74,7 @@ int main(void)
 	//stars the threads for the pi regulator and the processing of the image
 	move_car_start();
 	process_image_start();
-	//led_manager_start();
+	led_manager_start();
 	//proximity_sensor_start();
 
     /* Infinite loop. */

@@ -16,11 +16,14 @@ static THD_FUNCTION(LedManager, arg) {
     
     uint8_t movement;
     uint8_t turning;
+    systime_t time;
     
     while(1)
     {
-        movement = get_movement();
+    	time = chVTGetSystemTime();
+    	movement = get_movement();
         turning = get_turning();
+
 
         if(movement == MOV_STOP)
         {
@@ -51,6 +54,7 @@ static THD_FUNCTION(LedManager, arg) {
 			set_led(LED3, 0);
 			set_led(LED7,0);
         }
+        chThdSleepUntilWindowed(time, time + MS2ST(250));
     }
 
 }
