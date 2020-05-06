@@ -41,6 +41,7 @@ static THD_FUNCTION(MoveCar, arg) {
 
         gravity_compensation = get_acceleration(Y_AXIS)*G_COEFF;
 
+        speed_m = change_speed(speed_m,select_state);
 
 
         	//if(!get_proximity_on()){ //&& get_movement()!=MOV_STOP
@@ -52,9 +53,9 @@ static THD_FUNCTION(MoveCar, arg) {
         				if(abs(speed_correction) < ROTATION_THRESHOLD){
         					speed_correction = 0;
         				}
-        				speed=set_speed(speed_m, count_speed);
-        				right_motor_set_speed(speed - ROTATION_COEFF * speed_correction);
-        				left_motor_set_speed(speed + ROTATION_COEFF * speed_correction);
+        				//speed=set_speed(speed_m, count_speed);
+        				right_motor_set_speed(speed_m - ROTATION_COEFF * speed_correction);
+        				left_motor_set_speed(speed_m + ROTATION_COEFF * speed_correction);
         				count_no_line=0;
         	}else{
         		right_motor_set_speed(0);
@@ -98,10 +99,10 @@ int16_t change_speed(int16_t speed_max, uint8_t select_state)
 	if(!dif)
 		return speed_max;
 
-	else if((dif>1 && dif<8) || dif<-8)
+	else if((dif>0 && dif<9) || dif<-8)
 		speed_max+=200;
 
-	else if((dif<-1 && dif>-8) || dif>8)
+	else if((dif<0 && dif>-9) || dif>8)
 		speed_max-=200;
 
 	if(speed_max > MAX_SPEED)
