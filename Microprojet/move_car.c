@@ -15,7 +15,7 @@
 #include <i2c_bus.h>
 
 
-static THD_WORKING_AREA(waMoveCar, 256);
+static THD_WORKING_AREA(waMoveCar, 4096);
 static THD_FUNCTION(MoveCar, arg) {
 
     chRegSetThreadName(__FUNCTION__);
@@ -29,19 +29,21 @@ static THD_FUNCTION(MoveCar, arg) {
     int16_t speed_correction = 0;
     uint8_t count_no_line=0;
 
-    messagebus_topic_t *imu_topic = messagebus_find_topic_blocking(&bus, "/imu");
-    imu_msg_t imu_values;
+    //messagebus_topic_t *imu_topic = messagebus_find_topic_blocking(&bus, "/imu");
+    //imu_msg_t imu_values;
+    float gravity_compensation;
+    calibrate_acc();
 
     while(1){
         time = chVTGetSystemTime();
         speed=400;
-        selector = get_selector();
+        //selector = get_selector();
 
-        messagebus_topic_wait(imu_topic, &imu_values, sizeof(imu_values));
+        //messagebus_topic_wait(imu_topic, &imu_values, sizeof(imu_values));
 
-        float gravity_compensation = imu_values.acceleration[Y_AXIS]*G_COEFF;
+        gravity_compensation = get_acceleration(Y_AXIS)*G_COEFF;
 
-        //if(!get_proximity_on()){
+        //if(!get_proximity_on()){ //&& get_movement()!=MOV_STOP
         if(get_line_position()<IMAGE_BUFFER_SIZE && get_line_position()>0){	//&& get_movement()!=MOV_STOP
         			speed_correction = (get_line_position()- (IMAGE_BUFFER_SIZE/2));
         			//if the line is nearly in front of the camera, don't rotate
@@ -62,7 +64,12 @@ static THD_FUNCTION(MoveCar, arg) {
         	}
         }
         //}
-
+        /*
+        if(gravity_compensation<400 && gravity_compensation>-400){
+        	  right_motor_set_speed(speed+gravity_compensation);
+        	  left_motor_set_speed(speed+gravity_compensation);
+        }*/
+        //chprintf((BaseSequentialStream *)&SD3, "gravity = %f\n",gravity_compensation);
         //100Hz
         chThdSleepUntilWindowed(time, time + MS2ST(10));
     }

@@ -18,6 +18,7 @@
 #include <proximity_sensor.h>
 #include <i2c_bus.h>
 #include <sensors/imu.h>
+#include "sensors/proximity.h"
 
 messagebus_t bus;
 MUTEX_DECL(bus_lock);
@@ -66,12 +67,15 @@ int main(void)
 
 	//starts the proximity sensor
 	proximity_start();
+	//starts the imu sensors
+	imu_start();
+
 	i2c_start();
 	//stars the threads for the pi regulator and the processing of the image
 	move_car_start();
 	process_image_start();
-	led_manager_start();
-	proximity_sensor_start();
+	//led_manager_start();
+	//proximity_sensor_start();
 
     /* Infinite loop. */
     while (1) {
