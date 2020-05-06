@@ -28,6 +28,7 @@ extern "C" {
 #define MAX_COUNTER				100
 #define MAX_SPEED				400
 #define G_COEFF					50
+#define BLINKING_THRESHOLD		20 //en pixels
 
 /** Robot wide IPC bus. */
 extern messagebus_t bus;
