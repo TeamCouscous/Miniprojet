@@ -9,17 +9,27 @@
 #include <process_image.h>
 
 
-//static float distance_cm = 0;
 static uint8_t movement;
 static uint16_t linePosition;
-//static uint16_t line_position = IMAGE_BUFFER_SIZE/2;	//middle
-//static uint8_t color;
+
 
 //semaphore
 static BSEMAPHORE_DECL(image_ready_sem, TRUE);
 
-//checks if a light is turned on in the right side of the captured line
-uint8_t get_light(uint8_t *red, uint8_t *green, uint8_t *blue){
+
+/***************************INTERNAL FUNCTIONS************************************/
+
+/**
+* @brief   Returns the movement state value if a light is detected on the right side of the screen depending on its color
+*
+* @param  red, green and blue table that contain color intensities for all pixel in a line
+*
+* @return					MOV_START if light is green, MOV_STOP if light is green,
+* 							MOV_CONTINUE if no light is detected and previous value is MOV_START,
+* 							previous value if no light is detected.
+*/
+
+uint8_t set_movement_light(uint8_t *red, uint8_t *green, uint8_t *blue){
 	uint8_t red_pxl=0, green_pxl=0;
 	uint16_t i;
 
@@ -50,6 +60,14 @@ uint8_t get_light(uint8_t *red, uint8_t *green, uint8_t *blue){
 		return MOV_CONTINUE;
 }
 
+/**
+* @brief   Detects a black line and returns its position (center of the line).
+* 			If no line is detected, it returns an impossible value (-1).
+*
+* @param *buffer	table that contains all intensity pixel values of a line in the camera
+*
+* @return					line position of a detected black line
+*/
 uint16_t search_line_position(uint8_t *buffer){
 
 	uint16_t i = 0, begin = 0, end = 0;
@@ -125,6 +143,9 @@ uint16_t search_line_position(uint8_t *buffer){
 		return (begin + end)/2; //gives the line position.
 }
 
+/**
+* @brief   Thread which updates the measures
+*/
 static THD_WORKING_AREA(waCaptureImage, 256);
 static THD_FUNCTION(CaptureImage, arg) {
 
@@ -149,6 +170,9 @@ static THD_FUNCTION(CaptureImage, arg) {
 	    }
 	}
 
+/**
+* @brief   Thread which processes the measures of CaptureImage
+*/
 static THD_WORKING_AREA(waProcessImage, 4096);
 static THD_FUNCTION(ProcessImage, arg) {
 
@@ -156,7 +180,6 @@ static THD_FUNCTION(ProcessImage, arg) {
     (void)arg;
 
 	uint8_t *img_ctr_buff_ptr;
-	//uint8_t *img_bot_buff_ptr;
 	uint8_t clr_intensity[IMAGE_BUFFER_SIZE] = {0};
 	uint8_t red[IMAGE_BUFFER_SIZE] = {0};
 	uint8_t green[IMAGE_BUFFER_SIZE] = {0};
@@ -189,7 +212,7 @@ static THD_FUNCTION(ProcessImage, arg) {
 		linePosition = search_line_position(clr_intensity);
 
 		//search for light
-		movement=get_light(red,green,blue);
+		movement=set_movement_light(red,green,blue);
 
 
 		/*if(send_to_computer){
@@ -199,17 +222,13 @@ static THD_FUNCTION(ProcessImage, arg) {
 		//invert the bool
 		send_to_computer = !send_to_computer;*/
 
-
-
-
-		/*chprintf((BaseSequentialStream *)&SD3, "green = %d\n",green_ctr[IMAGE_BUFFER_SIZE/2]);
-		chprintf((BaseSequentialStream *)&SD3, "blue = %d\n",blue_ctr[IMAGE_BUFFER_SIZE/2]);
-		chprintf((BaseSequentialStream *)&SD3, "red = %d\n",red_ctr[IMAGE_BUFFER_SIZE/2]);*/
-
-		//chprintf((BaseSequentialStream *)&SD3, "movement = %d\n",movement);
-
     }
 }
+
+/*************************END INTERNAL FUNCTIONS**********************************/
+
+
+/****************************PUBLIC FUNCTIONS*************************************/
 
 
 uint8_t get_movement(void){
@@ -227,3 +246,5 @@ void process_image_start(void){
 	chThdCreateStatic(waProcessImage, sizeof(waProcessImage), NORMALPRIO, ProcessImage, NULL);
 	chThdCreateStatic(waCaptureImage, sizeof(waCaptureImage), NORMALPRIO, CaptureImage, NULL);
 }
+
+/**************************END PUBLIC FUNCTIONS***********************************/

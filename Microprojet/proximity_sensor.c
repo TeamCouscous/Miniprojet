@@ -11,6 +11,11 @@
 
 static bool proximity_on;	//If proximity_on=1, an object is close to the robot
 
+/***************************INTERNAL FUNCTIONS************************************/
+
+/**
+* @brief   Thread which processes the sensor proximity measures
+*/
 static THD_WORKING_AREA(waProximitySensor, 2048);
 static THD_FUNCTION(ProximitySensor, arg) {
 
@@ -34,6 +39,10 @@ static THD_FUNCTION(ProximitySensor, arg) {
     }
 }
 
+/*************************END INTERNAL FUNCTIONS**********************************/
+
+
+/****************************PUBLIC FUNCTIONS*************************************/
 
 void proximity_sensor_start(void){
 	chThdCreateStatic(waProximitySensor, sizeof(waProximitySensor), NORMALPRIO+1, ProximitySensor, NULL);
@@ -42,3 +51,5 @@ void proximity_sensor_start(void){
 bool get_proximity_on(void){
 	return proximity_on;
 }
+
+/**************************END PUBLIC FUNCTIONS***********************************/

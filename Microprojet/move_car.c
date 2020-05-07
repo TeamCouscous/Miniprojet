@@ -15,6 +15,14 @@
 #include <msgbus/messagebus.h>
 #include <i2c_bus.h>
 
+static int16_t speed_right = 0;
+static int16_t speed_left = 0;
+
+/***************************INTERNAL FUNCTIONS************************************/
+
+/**
+* @brief   Thread which controls the motors
+*/
 
 static THD_WORKING_AREA(waMoveCar, 4096);
 static THD_FUNCTION(MoveCar, arg) {
@@ -24,75 +32,75 @@ static THD_FUNCTION(MoveCar, arg) {
 
     systime_t time;
 
-    int16_t speed;
     int16_t speed_m =0;
-    int16_t speed_correction = 0;
-    uint8_t count_no_line=0;
+    int16_t speed_correction =0;
+    int16_t speed=0;
 
     uint8_t select_state=0;
     uint8_t count_speed=0;;
-
-    float gravity_compensation;
-    calibrate_acc();
+    uint8_t count_no_line=0;
 
     while(1){
         time = chVTGetSystemTime();
 
-
-        gravity_compensation = get_acceleration(Y_AXIS)*G_COEFF;
-
         speed_m = change_speed(speed_m,select_state);
 
-        	if(get_movement()!=MOV_STOP && !get_proximity_on()){ // { //&& get_movement()!=MOV_STOP
-        		if(get_line_position()<IMAGE_BUFFER_SIZE && get_line_position()>0){	//&& get_movement()!=MOV_STOP
-        				//speed_m = change_speed(speed_m,select_state);
+        	if(get_movement()!=MOV_STOP && !get_proximity_on()){
+        		if(get_line_position()<IMAGE_BUFFER_SIZE && get_line_position()>0){
 
         				speed_correction = (get_line_position()- (IMAGE_BUFFER_SIZE/2));
+
         				//if the line is nearly in front of the camera, don't rotate
         				if(abs(speed_correction) < ROTATION_THRESHOLD){
         					speed_correction = 0;
         				}
-        				speed=set_speed(speed_m, count_speed);
-        				right_motor_set_speed(speed_m - ROTATION_COEFF * speed_correction);
-        				left_motor_set_speed(speed_m + ROTATION_COEFF * speed_correction);
+        				if(count_speed<MAX_COUNTER)
+        					count_speed++;
+        				//speed=set_speed(speed_m, count_speed);
+        				speed=speed_m;
+        				speed_right=speed - ROTATION_COEFF * speed_correction;
+        				speed_left=speed + ROTATION_COEFF * speed_correction;
         				count_no_line=0;
         		}else{
-        			right_motor_set_speed(0);
-        			left_motor_set_speed(0);
-        			count_no_line++;
-        			if(count_no_line>50){ //turn left until finds line
+        			if(count_no_line==50){ //turn left until finds line
         				count_speed=0;
-        				right_motor_set_speed(-200);
-        				left_motor_set_speed(200);
+        				speed_right= -MAX_SPEED/4;
+        				speed_left= MAX_SPEED/4;
+        			}else{
+        				speed_right=speed_left=0;
+        				count_no_line++;
         			}
         		}
         	}else{
-        			right_motor_set_speed(0);
-        		    left_motor_set_speed(0);
+        		speed_right=speed_left=0;
         	}
-        //}
-        /*
-        if(gravity_compensation<400 && gravity_compensation>-400){
-        	  right_motor_set_speed(speed+gravity_compensation);
-        	  left_motor_set_speed(speed+gravity_compensation);
-        }*/
-        //chprintf((BaseSequentialStream *)&SD3, "gravity = %f\n",gravity_compensation);
+
+        	right_motor_set_speed(speed_right);
+        	left_motor_set_speed(speed_left);
+
         //100Hz
         chThdSleepUntilWindowed(time, time + MS2ST(10));
     }
 }
 
+
+/*************************END INTERNAL FUNCTIONS**********************************/
+
+
+/****************************PUBLIC FUNCTIONS*************************************/
+
 //sets speed from 4 (=MAX_SPEED/MAX_COUNTER) to 400 (=MAX_SPEED) steps/s depending on the counter value and stays at MAX_SPEED
 int16_t set_speed(int16_t speed_max, uint8_t counter){
 	//if counter equals MAX_COUNTER or exceeds this value
-	if(counter + 20 == MAX_COUNTER){
+	if(counter > MAX_COUNTER){
 		return speed_max;
 	}else{
-		counter++;
-		return (counter+20)*(10*speed_max/MAX_COUNTER);
+		return (counter)*(speed_max/MAX_COUNTER);
 	}
 }
-
+/*
+ *
+ */
 //speed_m = {-200; 0; 200; 400; 600; 800}
 int16_t change_speed(int16_t speed_max, uint8_t select_state)
 {
@@ -117,15 +125,16 @@ int16_t change_speed(int16_t speed_max, uint8_t select_state)
 }
 
 uint8_t get_turning(void){
-	/*if(linePosition-IMAGE_BUFFER_SIZE/2 > BLINKING_THRESHOLD)
-		return RIGHT;
-	else if(IMAGE_BUFFER_SIZE/2-linePosition > BLINKING_THRESHOLD)
+	if(abs(speed_right-speed_left)<SPEED_THRESHOLD)
+		return NO;
+	else if(speed_right>speed_left)
 		return LEFT;
 	else
-		return NO;*/
-	return NO;
+		return RIGHT;
 }
 
 void move_car_start(void){
 	chThdCreateStatic(waMoveCar, sizeof(waMoveCar), NORMALPRIO, MoveCar, NULL);
 }
+
+/**************************END PUBLIC FUNCTIONS***********************************/

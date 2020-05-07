@@ -2,12 +2,19 @@
 #include "hal.h"
 #include <chprintf.h>
 #include <usbcfg.h>
+#include <leds.h>
 
 #include <main.h>
-#include <leds.h>
 #include <LED_manager.h>
+#include <process_image.h>
 #include <move_car.h>
 
+
+/***************************INTERNAL FUNCTIONS************************************/
+
+ /**
+ * @brief   Thread which controls the LEDs
+ */
 static THD_WORKING_AREA(waLedManager, 256);
 static THD_FUNCTION(LedManager, arg) {
 	
@@ -59,6 +66,12 @@ static THD_FUNCTION(LedManager, arg) {
 
 }
 
+/*************************END INTERNAL FUNCTIONS**********************************/
+
+/****************************PUBLIC FUNCTIONS*************************************/
+
 void led_manager_start(void){
 	chThdCreateStatic(waLedManager, sizeof(waLedManager), NORMALPRIO, LedManager, NULL);
 }
+
+/**************************END PUBLIC FUNCTIONS***********************************/

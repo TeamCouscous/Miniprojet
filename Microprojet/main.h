@@ -16,16 +16,12 @@ extern "C" {
 #define MIN_LINE_WIDTH			40
 #define ROTATION_THRESHOLD		10
 #define ROTATION_COEFF			2
-#define PXTOCM					650.0f //experimental value
-#define GOAL_DISTANCE 			12.0f
-#define MAX_DISTANCE 			10.0f
-#define ERROR_THRESHOLD			0.1f	//[cm] because of the noise of the camera
-#define MAX_SUM_ERROR 			(MOTOR_SPEED_LIMIT/KI)
+#define SPEED_THRESHOLD			10
 #define MOV_START				1
 #define MOV_STOP				0
 #define MOV_CONTINUE			2
-#define PROXIMITY_MAX			200
-#define MAX_COUNTER				1000
+#define PROXIMITY_MAX			150
+#define MAX_COUNTER				50
 #define MAX_SPEED				800
 #define BACKWARD_SPEED			-200
 #define G_COEFF					50

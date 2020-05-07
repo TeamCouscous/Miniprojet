@@ -1,10 +1,15 @@
 #ifndef PROXIMITY_SENSOR_H_
 #define PROXIMITY_SENSOR_H_
 
-//start the Proximity sensor thread
+/**
+ * @brief   Starts the proximity sensor thread
+ */
 void proximity_sensor_start(void);
-
-//get bool proximity_on that detects if an object is in proximity of the robot
+/**
+ * @brief   Returns the boolean that shows if an object is in proximity of the robot
+ *
+ * @return	true if an object is detected, false if no object is detected
+ */
 bool get_proximity_on(void);
 
 
