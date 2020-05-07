@@ -25,7 +25,7 @@ extern "C" {
 #define MOV_STOP				0
 #define MOV_CONTINUE			2
 #define PROXIMITY_MAX			200
-#define MAX_COUNTER				100
+#define MAX_COUNTER				1000
 #define MAX_SPEED				800
 #define BACKWARD_SPEED			-200
 #define G_COEFF					50

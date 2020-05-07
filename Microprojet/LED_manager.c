@@ -6,7 +6,7 @@
 #include <main.h>
 #include <leds.h>
 #include <LED_manager.h>
-#include <process_image.h>
+#include <move_car.h>
 
 static THD_WORKING_AREA(waLedManager, 256);
 static THD_FUNCTION(LedManager, arg) {

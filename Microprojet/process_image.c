@@ -57,8 +57,8 @@ uint16_t search_line_position(uint8_t *buffer){
 	uint32_t mean = 0;
 
 	//performs an average
-	for(uint16_t i = 0 ; i < IMAGE_BUFFER_SIZE ; i++){
-		mean += buffer[i];
+	for(uint16_t j = 0 ; j < IMAGE_BUFFER_SIZE ; j++){
+		mean += buffer[j];
 	}
 	mean /= IMAGE_BUFFER_SIZE;
 
@@ -67,6 +67,11 @@ uint16_t search_line_position(uint8_t *buffer){
 		//search for a begin
 		while(stop == 0 && i < (IMAGE_BUFFER_SIZE - WIDTH_SLOPE))
 		{
+			if(buffer[i]<mean && i<5){
+					begin=4;
+					stop=1;
+					i=4;
+			}
 			//the slope must at least be WIDTH_SLOPE wide and is compared
 		    //to the mean of the image
 		    if(buffer[i] > mean && buffer[i+WIDTH_SLOPE] < mean)
@@ -211,14 +216,7 @@ uint8_t get_movement(void){
 	return movement;
 }
 
-uint8_t get_turning(void){
-	if(linePosition-IMAGE_BUFFER_SIZE/2 > BLINKING_THRESHOLD)
-		return RIGHT;
-	else if(IMAGE_BUFFER_SIZE/2-linePosition > BLINKING_THRESHOLD)
-		return LEFT;
-	else
-		return NO;
-}
+
 
 uint16_t get_line_position(void){
 	return linePosition;

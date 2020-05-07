@@ -75,7 +75,7 @@ int main(void)
 	move_car_start();
 	process_image_start();
 	led_manager_start();
-	//proximity_sensor_start();
+	proximity_sensor_start();
 
     /* Infinite loop. */
     while (1) {

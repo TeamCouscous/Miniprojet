@@ -16,16 +16,19 @@ static THD_FUNCTION(ProximitySensor, arg) {
 
     chRegSetThreadName(__FUNCTION__);
     (void)arg;
+    systime_t time;
 
     while(1){
-    	//calibrate_ir();
+    	 time = chVTGetSystemTime();
     	bool prox_on=0;
-    	for(uint16_t  i=0; i<PROXIMITY_NB_CHANNELS; i++){
+    	for(uint8_t  i=0; i<PROXIMITY_NB_CHANNELS; i++){
     		if(get_prox(i)> PROXIMITY_MAX){
     			prox_on=1;
     		}
     	}
     	proximity_on=prox_on;
+
+    	chThdSleepUntilWindowed(time, time + MS2ST(10));
 
     	//chprintf((BaseSequentialStream *)&SD3, "proximity on = %d\n", proximity_on);
     }
