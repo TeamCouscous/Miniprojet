@@ -49,17 +49,30 @@ static THD_FUNCTION(LedManager, arg) {
         {
 			set_led(LED7, 2);//toggle
 			set_led(LED3,0);
+			set_led(LED5,0);
         }
 
         else if(turning==RIGHT)
 		{
 			set_led(LED3,2);//toggle
 			set_led(LED7,0);
+			set_led(LED5,0);
 		}
-        else if(!turning)
+        else if(turning==STRAIGHT)
         {
 			set_led(LED3, 0);
 			set_led(LED7,0);
+			set_led(LED5,0);
+        }
+        else if(turning==STOP){
+        	set_led(LED3, 0);
+        	set_led(LED7,0);
+        	set_led(LED5,1);
+        }
+        else{ //turning==BACK
+        	set_led(LED3, 0);
+        	set_led(LED7,0);
+        	set_led(LED5,2);
         }
         chThdSleepUntilWindowed(time, time + MS2ST(250));
     }

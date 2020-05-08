@@ -13,4 +13,14 @@ void proximity_sensor_start(void);
 bool get_proximity_on(void);
 
 
+/**
+ * @brief   Starts the imu sensor thread
+ */
+void imu_sensor_start(void);
+
+int16_t get_g_compensation(void);
+
+float get_acc_Y(void);
+
+
 #endif /* PROXIMITY_SENSOR_H_ */

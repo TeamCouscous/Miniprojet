@@ -1,19 +1,20 @@
 #include "ch.h"
 #include "hal.h"
-#include <math.h>
 #include <usbcfg.h>
 #include <chprintf.h>
 
 #include <selector.h>
-#include <main.h>
-#include <motors.h>
-#include <process_image.h>
-#include <proximity_sensor.h>
-#include <leds.h>
-#include <move_car.h>
 #include <sensors/imu.h>
+#include <motors.h>
+#include <leds.h>
 #include <msgbus/messagebus.h>
 #include <i2c_bus.h>
+
+#include <main.h>
+#include <process_image.h>
+#include <proximity_sensor.h>
+#include <move_car.h>
+
 
 static int16_t speed_right = 0;
 static int16_t speed_left = 0;
@@ -40,12 +41,13 @@ static THD_FUNCTION(MoveCar, arg) {
     uint8_t count_speed=0;;
     uint8_t count_no_line=0;
 
+
     while(1){
         time = chVTGetSystemTime();
-
+        //int16_t g_comp = get_g_compensation();
         speed_m = change_speed(speed_m,select_state);
 
-        	if(get_movement()!=MOV_STOP && !get_proximity_on()){
+        	if(get_movement()!=MOV_STOP){//&& !get_proximity_on()){
         		if(get_line_position()<IMAGE_BUFFER_SIZE && get_line_position()>0){
 
         				speed_correction = (get_line_position()- (IMAGE_BUFFER_SIZE/2));
@@ -56,16 +58,16 @@ static THD_FUNCTION(MoveCar, arg) {
         				}
         				if(count_speed<MAX_COUNTER)
         					count_speed++;
-        				//speed=set_speed(speed_m, count_speed);
-        				speed=speed_m;
+        				speed=set_speed(speed_m, count_speed);
+        				//speed=speed_m;
         				speed_right=speed - ROTATION_COEFF * speed_correction;
         				speed_left=speed + ROTATION_COEFF * speed_correction;
         				count_no_line=0;
         		}else{
         			if(count_no_line==50){ //turn left until finds line
         				count_speed=0;
-        				speed_right= -MAX_SPEED/4;
-        				speed_left= MAX_SPEED/4;
+        				speed_right= speed_m;
+        				speed_left= speed_m;
         			}else{
         				speed_right=speed_left=0;
         				count_no_line++;
@@ -74,20 +76,15 @@ static THD_FUNCTION(MoveCar, arg) {
         	}else{
         		speed_right=speed_left=0;
         	}
+        right_motor_set_speed(speed_right);
+        left_motor_set_speed(speed_left);
 
-        	right_motor_set_speed(speed_right);
-        	left_motor_set_speed(speed_left);
-
+        chprintf((BaseSequentialStream *)&SD3, "acc = %f\n", get_acc_Y());
+        //chprintf((BaseSequentialStream *)&SD3,"gyro = %d\n", g_comp);
         //100Hz
         chThdSleepUntilWindowed(time, time + MS2ST(10));
     }
 }
-
-
-/*************************END INTERNAL FUNCTIONS**********************************/
-
-
-/****************************PUBLIC FUNCTIONS*************************************/
 
 //sets speed from 4 (=MAX_SPEED/MAX_COUNTER) to 400 (=MAX_SPEED) steps/s depending on the counter value and stays at MAX_SPEED
 int16_t set_speed(int16_t speed_max, uint8_t counter){
@@ -124,9 +121,22 @@ int16_t change_speed(int16_t speed_max, uint8_t select_state)
 		return speed_max;
 }
 
+
+
+/*************************END INTERNAL FUNCTIONS**********************************/
+
+
+/****************************PUBLIC FUNCTIONS*************************************/
+
+
+
 uint8_t get_turning(void){
-	if(abs(speed_right-speed_left)<SPEED_THRESHOLD)
-		return NO;
+	if(speed_right<0 && speed_left<0)
+		return BACK;
+	else if(speed_right==0 && speed_left==0)
+		return STOP;
+	else if(abs(speed_right-speed_left)<SPEED_THRESHOLD)
+		return STRAIGHT;
 	else if(speed_right>speed_left)
 		return LEFT;
 	else

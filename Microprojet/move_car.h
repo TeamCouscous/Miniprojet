@@ -1,12 +1,6 @@
 #ifndef MOVE_CAR_H
 #define MOVE_CAR_H
 
-//List of the turning states
-enum{
-	NO,
-	LEFT,
-	RIGHT
-};
 
 /**
 * @brief   Sets speed from speed_max/MAX_COUNTER until speed_max values depending on the counter value
@@ -30,6 +24,9 @@ int16_t set_speed(int16_t speed_max, uint8_t counter);
 * @return	Speed_max value
 */
 int16_t change_speed(int16_t speed_max, uint8_t select_state);
+
+void set_speed_control(void);
+
 
 /**
  *  @brief   Returns the turning state based on the right and left speed

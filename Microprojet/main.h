@@ -10,6 +10,15 @@ extern "C" {
 #include "parameter/parameter.h"
 
 
+//List of the turning states
+enum{
+	STOP,
+	STRAIGHT,
+	LEFT,
+	RIGHT,
+	BACK
+};
+
 //constants for the differents parts of the project
 #define IMAGE_BUFFER_SIZE		640
 #define WIDTH_SLOPE				5
@@ -26,7 +35,8 @@ extern "C" {
 #define BACKWARD_SPEED			-200
 #define G_COEFF					50
 #define BLINKING_THRESHOLD		20 //en pixels
-
+#define GYRO_MIN				100
+#define G_MIN					10
 
 /** Robot wide IPC bus. */
 extern messagebus_t bus;
