@@ -42,6 +42,7 @@ static THD_FUNCTION(MoveCar, arg) {
     select_state=get_selector();
     uint8_t count_speed=0;;
     uint8_t count_no_line=0;
+    uint8_t count_turn_around = 0;
 
 
     while(1){
@@ -49,7 +50,20 @@ static THD_FUNCTION(MoveCar, arg) {
         //int16_t g_comp = get_g_compensation();
         speed_m = change_speed(speed_m);
         	if(get_movement()!=MOV_STOP){//&& !get_proximity_on()){
-        		if(get_line_position()<IMAGE_BUFFER_SIZE && get_line_position()>0){
+
+        		if(get_turn_around() == LEFT)
+        		{
+        			speed_right = 200;
+        			speed_left = -200;
+        		}
+
+        		else if(get_turn_around() == RIGHT)
+        		{
+        			speed_left = 200;
+        			speed_right = -200;
+        		}
+
+        		else if(get_line_position()<IMAGE_BUFFER_SIZE && get_line_position()>0){
         				//g_comp=get_acc_Y();
         				if(speed_m<0){
         					speed_correction = - (get_line_position()+ (IMAGE_BUFFER_SIZE/2));
@@ -110,6 +124,10 @@ int16_t change_speed(int16_t speed_max)
 	uint8_t old_select = select_state;
 	select_state = get_selector();
 	int8_t dif = select_state - old_select;
+
+	if(accel)
+		return MAX_SPEED;
+
 	if(!dif)
 		return speed_max;
 
@@ -119,7 +137,7 @@ int16_t change_speed(int16_t speed_max)
 	else if((dif<0 && dif>-9) || dif>8)
 		speed_max-=200;
 
-	if(speed_max > MAX_SPEED || accel)
+	if(speed_max > MAX_SPEED)
 		return MAX_SPEED;
 
 	else if(speed_max < BACKWARD_SPEED)
@@ -129,6 +147,15 @@ int16_t change_speed(int16_t speed_max)
 		return speed_max;
 }
 
+void turn_around_left(void)
+{
+
+}
+
+void turn_around_right(void)
+{
+
+}
 
 
 /*************************END INTERNAL FUNCTIONS**********************************/

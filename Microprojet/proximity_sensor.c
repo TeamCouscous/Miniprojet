@@ -28,25 +28,46 @@ static THD_FUNCTION(ProximitySensor, arg) {
     (void)arg;
     systime_t time;
 
+    uint16_t count_t=0;
+    uint16_t count_a=0;
 
     while(1){
     	 time = chVTGetSystemTime();
     	bool prox_on=0;
 
     	if(get_prox(6) > PROXIMITY_MAX || get_prox(7) > PROXIMITY_MAX)
+    	{
     		turn_around = RIGHT;
+    		count_t = 0;
+    	}
 
     	else if(get_prox(0)> PROXIMITY_MAX || get_prox(1) > PROXIMITY_MAX)
+    	{
     		turn_around = LEFT;
+    		count_t = 0;
+    	}
 
-    	else
+    	else if(count_t = 300)
+    	{
     		turn_around = 0;
+    		count_t = 0;
+    	}
 
 		if(get_prox(3) > PROXIMITY_MAX || get_prox(4) > PROXIMITY_MAX)
-			accelerate =1;
+		{
+			accelerate = 1;
+			count_a = 0;
+		}
 
-		else
+		else if(count_a > 100)
+		{
 			accelerate = 0;
+			count_a = 0;
+		}
+		count_a ++;
+
+		count_t ++;
+
 
     	/*for(uint8_t  i=0; i<PROXIMITY_NB_CHANNELS; i++){
     		if(get_prox(i)> PROXIMITY_MAX ){
