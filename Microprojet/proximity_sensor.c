@@ -13,6 +13,8 @@
 static bool proximity_on;//If proximity_on=1, an object is close to the robot
 static int16_t g_compensation;
 static float acc;
+static int8_t turn_around=0;
+static bool accelerate = 0;
 
 /***************************INTERNAL FUNCTIONS************************************/
 
@@ -31,18 +33,27 @@ static THD_FUNCTION(ProximitySensor, arg) {
     	 time = chVTGetSystemTime();
     	bool prox_on=0;
 
-    	for(uint8_t  i=0; i<PROXIMITY_NB_CHANNELS; i++){
+    	if(get_prox(6) > PROXIMITY_MAX || get_prox(7) > PROXIMITY_MAX)
+    		turn_around = RIGHT;
+
+    	else if(get_prox(0)> PROXIMITY_MAX || get_prox(1) > PROXIMITY_MAX)
+    		turn_around = LEFT;
+
+		if(get_prox(3) > PROXIMITY_MAX || get_prox(4) > PROXIMITY_MAX)
+			accelerate =1;
+
+    	/*for(uint8_t  i=0; i<PROXIMITY_NB_CHANNELS; i++){
     		if(get_prox(i)> PROXIMITY_MAX ){
     			prox_on=1;
-    		}
-    	}
+    }*/
     	proximity_on=prox_on;
 
     	chThdSleepUntilWindowed(time, time + MS2ST(10));
 
-    	//chprintf((BaseSequentialStream *)&SD3, "proximity on = %d\n", proximity_on);
+    	chprintf((BaseSequentialStream *)&SD3, "turn_around = %d\n accelerate=%d\n", turn_around, accelerate);
     }
 }
+
 
 
 
