@@ -106,6 +106,7 @@ int16_t set_speed(int16_t speed_max, uint8_t counter){
 //speed_m = {-200; 0; 200; 400; 600; 800}
 int16_t change_speed(int16_t speed_max)
 {
+	bool accel = get_accelerate();
 	uint8_t old_select = select_state;
 	select_state = get_selector();
 	int8_t dif = select_state - old_select;
@@ -117,10 +118,13 @@ int16_t change_speed(int16_t speed_max)
 
 	else if((dif<0 && dif>-9) || dif>8)
 		speed_max-=200;
-	if(speed_max > MAX_SPEED)
+
+	if(speed_max > MAX_SPEED || accel)
 		return MAX_SPEED;
+
 	else if(speed_max < BACKWARD_SPEED)
 		return BACKWARD_SPEED;
+
 	else
 		return speed_max;
 }

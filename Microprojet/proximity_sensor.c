@@ -44,6 +44,7 @@ static THD_FUNCTION(ProximitySensor, arg) {
 
 		if(get_prox(3) > PROXIMITY_MAX || get_prox(4) > PROXIMITY_MAX)
 			accelerate =1;
+
 		else
 			accelerate = 0;
 
@@ -115,6 +116,14 @@ int16_t get_g_compensation(void){
 
 float get_acc_Y(void){
 	return acc;
+}
+
+int8_t get_turn_around(void){
+	return turn_around;
+}
+
+bool get_accelerate(void){
+	return accelerate;
 }
 
 
