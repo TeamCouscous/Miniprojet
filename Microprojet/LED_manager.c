@@ -35,7 +35,7 @@ static THD_FUNCTION(LedManager, arg) {
         if(movement == MOV_STOP)
         {
         	set_body_led(0);
-        	set_front_led(1);
+        	set_front_led(0);
         	//set_led(LED5, 1); //set back led (red)
         }
 

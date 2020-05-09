@@ -57,18 +57,18 @@ static THD_FUNCTION(ImuSensor, arg) {
 
     while(1){
     	 time = chVTGetSystemTime();
-    	 //int16_t gyro_X = get_gyro(X_AXIS);
-    	 acc=get_acceleration(Y_AXIS);
+    	 g_compensation = get_gyro(X_AXIS)-get_gyro_offset(X_AXIS);
+    	 //acc=get_acceleration(Y_AXIS);
     	 //if(abs(gyro_X) > GYRO_MIN)
 
-    		// g_compensation += gyro_X/G_COEFF;
-
+    	//g_compensation += gyro_X/G_COEFF;
+    	 /*
     	 if(abs(g_compensation) < G_MIN)
     	 {
     		 g_compensation = 0;
     		 calibrate_gyro();
     	 }
-
+	*/
 
     	chThdSleepUntilWindowed(time, time + MS2ST(10));
 

@@ -30,10 +30,11 @@ enum{
 #define MOV_STOP				0
 #define MOV_CONTINUE			2
 #define PROXIMITY_MAX			150
-#define MAX_COUNTER				50
+#define MAX_COUNTER				100
 #define MAX_SPEED				800
 #define BACKWARD_SPEED			-200
 #define G_COEFF					50
+#define S_COEFF					20
 #define BLINKING_THRESHOLD		20 //en pixels
 #define GYRO_MIN				100
 #define G_MIN					10

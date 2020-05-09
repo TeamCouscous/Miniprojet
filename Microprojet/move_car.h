@@ -23,7 +23,7 @@ int16_t set_speed(int16_t speed_max, uint8_t counter);
 *
 * @return	Speed_max value
 */
-int16_t change_speed(int16_t speed_max, uint8_t select_state);
+int16_t change_speed(int16_t speed_max);
 
 void set_speed_control(void);
 

@@ -18,6 +18,7 @@
 
 static int16_t speed_right = 0;
 static int16_t speed_left = 0;
+static uint8_t select_state;
 
 /***************************INTERNAL FUNCTIONS************************************/
 
@@ -36,8 +37,9 @@ static THD_FUNCTION(MoveCar, arg) {
     int16_t speed_m =0;
     int16_t speed_correction =0;
     int16_t speed=0;
+    float g_comp = 0;
 
-    uint8_t select_state=0;
+    select_state=get_selector();
     uint8_t count_speed=0;;
     uint8_t count_no_line=0;
 
@@ -45,13 +47,15 @@ static THD_FUNCTION(MoveCar, arg) {
     while(1){
         time = chVTGetSystemTime();
         //int16_t g_comp = get_g_compensation();
-        speed_m = change_speed(speed_m,select_state);
-
+        speed_m = change_speed(speed_m);
         	if(get_movement()!=MOV_STOP){//&& !get_proximity_on()){
         		if(get_line_position()<IMAGE_BUFFER_SIZE && get_line_position()>0){
-
-        				speed_correction = (get_line_position()- (IMAGE_BUFFER_SIZE/2));
-
+        				//g_comp=get_acc_Y();
+        				if(speed_m<0){
+        					speed_correction = - (get_line_position()+ (IMAGE_BUFFER_SIZE/2));
+        				}else{
+        					speed_correction = (get_line_position()- (IMAGE_BUFFER_SIZE/2));
+        				}
         				//if the line is nearly in front of the camera, don't rotate
         				if(abs(speed_correction) < ROTATION_THRESHOLD){
         					speed_correction = 0;
@@ -60,6 +64,7 @@ static THD_FUNCTION(MoveCar, arg) {
         					count_speed++;
         				speed=set_speed(speed_m, count_speed);
         				//speed=speed_m;
+        				//g_comp = (int16_t)(get_acc_Y()*G_COEFF + speed_m/S_COEFF);
         				speed_right=speed - ROTATION_COEFF * speed_correction;
         				speed_left=speed + ROTATION_COEFF * speed_correction;
         				count_no_line=0;
@@ -79,8 +84,8 @@ static THD_FUNCTION(MoveCar, arg) {
         right_motor_set_speed(speed_right);
         left_motor_set_speed(speed_left);
 
-        chprintf((BaseSequentialStream *)&SD3, "acc = %f\n", get_acc_Y());
-        //chprintf((BaseSequentialStream *)&SD3,"gyro = %d\n", g_comp);
+        //chprintf((BaseSequentialStream *)&SD3, "get_acc_Y = %f\n", get_acc_Y());
+        chprintf((BaseSequentialStream *)&SD3,"g_comp = %d\n", get_g_compensation());
         //100Hz
         chThdSleepUntilWindowed(time, time + MS2ST(10));
     }
@@ -99,7 +104,7 @@ int16_t set_speed(int16_t speed_max, uint8_t counter){
  *
  */
 //speed_m = {-200; 0; 200; 400; 600; 800}
-int16_t change_speed(int16_t speed_max, uint8_t select_state)
+int16_t change_speed(int16_t speed_max)
 {
 	uint8_t old_select = select_state;
 	select_state = get_selector();
@@ -112,7 +117,6 @@ int16_t change_speed(int16_t speed_max, uint8_t select_state)
 
 	else if((dif<0 && dif>-9) || dif>8)
 		speed_max-=200;
-
 	if(speed_max > MAX_SPEED)
 		return MAX_SPEED;
 	else if(speed_max < BACKWARD_SPEED)
