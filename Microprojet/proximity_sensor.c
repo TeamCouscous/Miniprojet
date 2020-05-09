@@ -39,8 +39,13 @@ static THD_FUNCTION(ProximitySensor, arg) {
     	else if(get_prox(0)> PROXIMITY_MAX || get_prox(1) > PROXIMITY_MAX)
     		turn_around = LEFT;
 
+    	else
+    		turn_around = 0;
+
 		if(get_prox(3) > PROXIMITY_MAX || get_prox(4) > PROXIMITY_MAX)
 			accelerate =1;
+		else
+			accelerate = 0;
 
     	/*for(uint8_t  i=0; i<PROXIMITY_NB_CHANNELS; i++){
     		if(get_prox(i)> PROXIMITY_MAX ){
