@@ -22,5 +22,9 @@ int16_t get_g_compensation(void);
 
 float get_acc_Y(void);
 
+int8_t get_turn_around(void);
+
+bool get_accelerate(void);
+
 
 #endif /* PROXIMITY_SENSOR_H_ */

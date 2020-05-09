@@ -37,6 +37,7 @@ static THD_FUNCTION(MoveCar, arg) {
     int16_t speed_m =0;
     int16_t speed_correction =0;
     int16_t speed=0;
+    int16_t old_speed=0;
     float g_comp = 0;
 
     select_state=get_selector();
@@ -45,11 +46,15 @@ static THD_FUNCTION(MoveCar, arg) {
     uint8_t count_turn_around = 0;
 
 
+
     while(1){
         time = chVTGetSystemTime();
         //int16_t g_comp = get_g_compensation();
-        speed_m = change_speed(speed_m);
-        	if(get_movement()!=MOV_STOP){//&& !get_proximity_on()){
+        speed_m = change_speed(speed_m,old_speed);
+        if(!get_accelerate())
+        	old_speed=speed_m;
+
+        	//if(get_movement()!=MOV_STOP){//&& !get_proximity_on()){
 
         		if(get_turn_around() == LEFT)
         		{
@@ -92,9 +97,9 @@ static THD_FUNCTION(MoveCar, arg) {
         				count_no_line++;
         			}
         		}
-        	}else{
+        	/*}else{
         		speed_right=speed_left=0;
-        	}
+        	}*/
         right_motor_set_speed(speed_right);
         left_motor_set_speed(speed_left);
 
@@ -118,7 +123,7 @@ int16_t set_speed(int16_t speed_max, uint8_t counter){
  *
  */
 //speed_m = {-200; 0; 200; 400; 600; 800}
-int16_t change_speed(int16_t speed_max)
+int16_t change_speed(int16_t speed_max, int16_t old_speed)
 {
 	bool accel = get_accelerate();
 	uint8_t old_select = select_state;
@@ -127,6 +132,8 @@ int16_t change_speed(int16_t speed_max)
 
 	if(accel)
 		return MAX_SPEED;
+	else
+		speed_max=old_speed;
 
 	if(!dif)
 		return speed_max;

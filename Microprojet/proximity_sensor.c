@@ -47,7 +47,7 @@ static THD_FUNCTION(ProximitySensor, arg) {
     		count_t = 0;
     	}
 
-    	else if(count_t = 300)
+    	else if(count_t == 300)
     	{
     		turn_around = 0;
     		count_t = 0;
@@ -59,7 +59,7 @@ static THD_FUNCTION(ProximitySensor, arg) {
 			count_a = 0;
 		}
 
-		else if(count_a > 100)
+		else if(count_a > 200)
 		{
 			accelerate = 0;
 			count_a = 0;
