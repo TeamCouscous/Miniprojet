@@ -13,7 +13,7 @@
 
 static int8_t turn_around=0;
 static bool accelerate = 0;
-static uint8_t inclined=0;
+//static uint8_t inclined=0; ////Supprimé car non fonctionnel
 
 /***************************INTERNAL FUNCTIONS************************************/
 
@@ -77,6 +77,7 @@ static THD_FUNCTION(ProximitySensor, arg) {
 /**
 * @brief   Thread which processes the imu sensor measures: acceleration in order to know the direction of the incline
 */
+/*
 static THD_WORKING_AREA(waImuSensor, 1024);
 static THD_FUNCTION(ImuSensor, arg) {
 
@@ -141,7 +142,7 @@ static THD_FUNCTION(ImuSensor, arg) {
 
 
     }
-}
+}*/ //Supprimé car non fonctionnel
 
 /*************************END INTERNAL FUNCTIONS**********************************/
 
@@ -152,9 +153,10 @@ void proximity_sensor_start(void){
 	chThdCreateStatic(waProximitySensor, sizeof(waProximitySensor), NORMALPRIO+1, ProximitySensor, NULL);
 }
 
+/*
 void imu_sensor_start(void){
 	chThdCreateStatic(waImuSensor, sizeof(waImuSensor), NORMALPRIO+1, ImuSensor, NULL);
-}
+}*/ //Supprimé car non fonctionnel
 
 
 
@@ -166,8 +168,9 @@ bool get_accelerate(void){
 	return accelerate;
 }
 
+/*
 uint8_t get_inclined(void){
 	return inclined;
-}
+}*/ //Supprimé car non fonctionnel
 
 /**************************END PUBLIC FUNCTIONS***********************************/

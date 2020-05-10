@@ -9,7 +9,7 @@ void proximity_sensor_start(void);
 /**
  * @brief   Starts the imu sensor thread
  */
-void imu_sensor_start(void);
+//void imu_sensor_start(void); //Supprimé car non fonctionnel
 
 /**
  * @brief  returns  turn around value
@@ -31,7 +31,7 @@ bool get_accelerate(void);
  * 			UP if the robot is moving up
  * 			DOWN if the robot is moving down
  */
-uint8_t get_inclined(void);
+//uint8_t get_inclined(void); //Supprimé car non fonctionnel
 
 
 

@@ -64,7 +64,6 @@ int main(void)
 	//inits the motors
 	motors_init();
 
-
 	//starts the proximity sensor
 	proximity_start();
 	//starts the imu sensors
@@ -76,7 +75,7 @@ int main(void)
 	process_image_start();
 	led_manager_start();
 	proximity_sensor_start();
-	imu_sensor_start();
+	//imu_sensor_start(); //Supprimé car non fonctionnel
 
     /* Infinite loop. */
     while (1) {
