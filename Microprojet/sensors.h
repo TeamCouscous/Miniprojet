@@ -14,8 +14,8 @@ void imu_sensor_start(void);
 /**
  * @brief  returns  turn around value
  * 			0 if nothing is detected on the 4 front proximity sensors
- * 			LEFT if an object is detected by the right front proximity sensors
- * 			RIGHT if an object is detected by the left front proximity sensors
+ * 			RIGHT if an object is detected by the right front proximity sensors
+ * 			LEFT if an object is detected by the left front proximity sensors
  */
 int8_t get_turn_around(void);
 
