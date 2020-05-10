@@ -20,7 +20,7 @@ static uint8_t inclined=0;
 /**
 * @brief   Thread which processes the sensor proximity measures
 */
-static THD_WORKING_AREA(waProximitySensor, 2048);
+static THD_WORKING_AREA(waProximitySensor, 1024);
 static THD_FUNCTION(ProximitySensor, arg) {
 
     chRegSetThreadName(__FUNCTION__);
@@ -32,31 +32,32 @@ static THD_FUNCTION(ProximitySensor, arg) {
 
     while(1){
     	 time = chVTGetSystemTime();
-
+    	 //When the front left proximity sensors detect an object
     	if(get_prox(6) > PROXIMITY_MAX || get_prox(7) > PROXIMITY_MAX)
     	{
     		turn_around = RIGHT;
     		count_t = 0;
     	}
-
+    	//When the front right proximity sensors detect an object
     	else if(get_prox(0)> PROXIMITY_MAX || get_prox(1) > PROXIMITY_MAX)
     	{
     		turn_around = LEFT;
     		count_t = 0;
     	}
-
+    	//turn around is reinitialized
     	else if(count_t == 300)
     	{
     		turn_around = 0;
     		count_t = 0;
     	}
-
+    	//When the back proximity sensors detect an object
 		if(get_prox(3) > PROXIMITY_MAX || get_prox(4) > PROXIMITY_MAX)
 		{
 			accelerate = 1;
 			count_a = 0;
 		}
 
+		//accelerate is reinitialized
 		else if(count_a > 200)
 		{
 			accelerate = 0;
@@ -68,13 +69,14 @@ static THD_FUNCTION(ProximitySensor, arg) {
 
     	chThdSleepUntilWindowed(time, time + MS2ST(10));
 
-    	//chprintf((BaseSequentialStream *)&SD3, "turn_around = %d\n accelerate=%d\n", turn_around, accelerate);
     }
 }
 
 
 
-
+/**
+* @brief   Thread which processes the imu sensor measures: acceleration in order to know the direction of the incline
+*/
 static THD_WORKING_AREA(waImuSensor, 1024);
 static THD_FUNCTION(ImuSensor, arg) {
 
@@ -82,7 +84,7 @@ static THD_FUNCTION(ImuSensor, arg) {
     (void)arg;
     systime_t time;
     calibrate_acc();
-    uint8_t count_up=0, count_down=0;
+    uint8_t count_up=0, count_down=0,count_plane=0;
     float angle=0;
 
     while(1){
@@ -97,32 +99,39 @@ static THD_FUNCTION(ImuSensor, arg) {
     		  if(angle > M_PI){
     			  angle = -2 * M_PI + angle;
     		  }
+
+    		  //Depending on the angle, the direction of the incline is known
     	      if(angle >= 0 && angle < M_PI/4){
     	          count_up++;
     	          count_down=0;
+    	          count_plane=0;
     	      }else if(angle >= 3*M_PI/4 && angle < M_PI){
     	    	  count_up=0;
     	    	  count_down++;
+    	    	  count_plane=0;
     	      }else if(angle >= -M_PI && angle < -3*M_PI/4){
     	    	  count_up=0;
     	    	  count_down++;
+    	    	  count_plane=0;
     	      }else if(angle >= -M_PI/4 && angle < 0){
     	    	  count_up++;
     	    	  count_down=0;
+    	    	  count_plane=0;
     	      }
     	      else{
     	    	  count_up=0;
     	    	  count_down=0;
     	      }
-
+    	      //If a certain direction is maintained 10 times
     	      if(count_up> 10){
     	    	  inclined = UP;
-    	    	  count_up=10;
+    	    	  count_up=50;
     	      }else if(count_down>10){
     	    	  inclined = DOWN;
     	    	  count_down=10;
-    	      }else{
+    	      }else if(count_plane>10){
     	    	  inclined=PLANE;
+    	    	  count_plane=10;
     	      }
     	 }
 

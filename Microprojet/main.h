@@ -36,7 +36,7 @@ enum{
 #define MOV_START				1
 #define MOV_STOP				0
 #define MOV_CONTINUE			2
-#define PROXIMITY_MAX			100
+#define PROXIMITY_MAX			50
 #define MAX_COUNTER				100
 #define MAX_SPEED				800
 #define BACKWARD_SPEED			-200

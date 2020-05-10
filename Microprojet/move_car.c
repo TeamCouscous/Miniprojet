@@ -42,23 +42,19 @@ static THD_FUNCTION(MoveCar, arg) {
     select_state=get_selector();
     uint8_t count_speed=0;;
     uint8_t count_no_line=0;
-    uint8_t incline=0;
-    bool accelerate=0;
 
 
     while(1){
         time = chVTGetSystemTime();
-        incline=get_inclined();
-        accelerate=get_accelerate();
-        speed_m = change_speed(speed_m,old_speed,incline,accelerate);
+        speed_m = change_speed(speed_m,old_speed);
 
-        //If the robot isn't moving on an inclined plane
-        //and the back sensors do not detect an object
-        if(accelerate==0 && incline ==PLANE){
+        //If the back sensors do not detect an object
+        //Keep the speed_m value
+        if(!get_accelerate()){
         	old_speed=speed_m;
         }
 
-        if(get_movement()==MOV_STOP || speed_m!=0){
+        if(get_movement()!=MOV_STOP){
        		//If proximity sensors on the left detect an object
        		if(get_turn_around() == LEFT)
        		{
@@ -84,6 +80,7 @@ static THD_FUNCTION(MoveCar, arg) {
        			}
        			if(count_speed<MAX_COUNTER)
        				count_speed++;
+
        			//Starts the speed from speed_m/MAX_COUNTER to speed_m
        			speed=set_speed(speed_m, count_speed);
 
@@ -111,6 +108,8 @@ static THD_FUNCTION(MoveCar, arg) {
         right_motor_set_speed(speed_right);
         left_motor_set_speed(speed_left);
 
+        chprintf((BaseSequentialStream *)&SD3, "speed_m %d\n", speed_m);
+
         //100Hz
         chThdSleepUntilWindowed(time, time + MS2ST(10));
     }
@@ -134,22 +133,17 @@ int16_t set_speed(int16_t speed_max, uint8_t counter){
 }
 
 //speed_m = {-200; 0; 200; 400; 600; 800}
-int16_t change_speed(int16_t speed_max, int16_t old_speed, uint8_t inclined, bool accel)
+int16_t change_speed(int16_t speed_max, int16_t old_speed)
 {
 	uint8_t old_select = select_state;
 	select_state = get_selector();
+	bool accel = get_accelerate();
 	int8_t dif = select_state - old_select;
-	if(speed_max > 0 ){ //If the robot is moving backwards or not at all, inclining or touching the robot from the back doesn't change its speed
-		if(accel || inclined==DOWN) //If going down or the back proximity sensor is touched -> speed_m=800
-			return MAX_SPEED;
-		else if(inclined==UP)
-			return MAX_SPEED/8; //if going up -> speed_m=200
-		else
-			speed_max=old_speed;
-	}else if(speed_max<0){
-		if(accel) //if moving backwards and an object is detected from the back -> moves forward
-			return MAX_SPEED/4;
-	}
+	if(accel){//If the back proximity sensor is touched -> speed_m=1000
+		return MAX_SPEED+200;
+	}else
+		speed_max=old_speed;
+
 	//if the selector isn't turned -> no change
 	if(!dif)
 		return speed_max;

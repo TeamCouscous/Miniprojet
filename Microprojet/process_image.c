@@ -200,7 +200,7 @@ static THD_FUNCTION(ProcessImage, arg) {
 
 	//uint16_t lineWidth = 0;
 
-	movement = MOV_STOP; //initialize movement to 0
+	movement = MOV_START; //initialize movement to 0
 
     while(1){
     	//waits until center has been captured
@@ -225,7 +225,8 @@ static THD_FUNCTION(ProcessImage, arg) {
 		linePosition = search_line_position(clr_intensity);
 
 		//search for light
-		movement=set_movement_light(red,green,blue);
+		//movement=set_movement_light(red,green,blue);
+
     }
 
 }

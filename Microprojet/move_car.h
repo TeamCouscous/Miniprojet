@@ -23,12 +23,10 @@ int16_t set_speed(int16_t speed_max, uint8_t counter);
 *
 * @param 	speed_max		Maximum speed value used by the motors
 *			select_state	Selector state ranges from 0 to 15
-*			incline			Incline state: UP, DOWN or PLANE
-*			accelerate		True if an object is detected by the back sensors
 *
 * @return	Speed_max value
 */
-int16_t change_speed(int16_t speed_max, int16_t old_speed, uint8_t incline, bool accelerate);
+int16_t change_speed(int16_t speed_max, int16_t old_speed);
 
 
 /**
