@@ -34,14 +34,18 @@ uint8_t set_movement_light(uint8_t *red, uint8_t *green, uint8_t *blue){
 	uint16_t i;
 
 	//To look for light only in the second half of the line
+	//The light is present on the right side of the robot
 	for(i= IMAGE_BUFFER_SIZE/2; i< IMAGE_BUFFER_SIZE;i++){
+		//A red light is detected
 		if( red[i] > green[i]/2+blue[i] && red[i]> 10){
 			red_pxl+=1;
-			if(red_pxl==50){
+			if(red_pxl==50){ //50 pixels are detected on
 				return MOV_STOP;
 			}
 		}else
 			red_pxl=0;
+
+		//A green light is detected
 		if(green[i] > 2*(red[i]+blue[i]) && green[i]>20){
 			green_pxl++;
 			if(green_pxl==50){
@@ -85,6 +89,8 @@ uint16_t search_line_position(uint8_t *buffer){
 		//search for a begin
 		while(stop == 0 && i < (IMAGE_BUFFER_SIZE - WIDTH_SLOPE))
 		{
+			//To detect a discontinued line with a begin before i=5
+			//If a begin was found without a slope
 			if(buffer[i]<mean && i<5){
 					begin=4;
 					stop=1;
@@ -113,7 +119,8 @@ uint16_t search_line_position(uint8_t *buffer){
 		        }
 		        i++;
 		    }
-		    //if an end was not found
+		    //Discontinued line with a begin and no end
+		    //if an end was not found, sets end
 		    if (i > IMAGE_BUFFER_SIZE || !end)
 		    {
 		    	end=IMAGE_BUFFER_SIZE;
@@ -134,11 +141,13 @@ uint16_t search_line_position(uint8_t *buffer){
 		}
 	}while(wrong_line);
 
+	//No line is detected
 	if(line_not_found){
 		begin = 0;
 		end = 0;
 		return -1;
 	}
+	//A line is detected
 	else
 		return (begin + end)/2; //gives the line position.
 }
@@ -178,17 +187,20 @@ static THD_FUNCTION(ProcessImage, arg) {
 
     chRegSetThreadName(__FUNCTION__);
     (void)arg;
-
+    //buffer containing line pixel values
 	uint8_t *img_ctr_buff_ptr;
+	//table containing a combination of the 3 color values for each pixel of a line
 	uint8_t clr_intensity[IMAGE_BUFFER_SIZE] = {0};
+	//Table containing red pixel values of a line
 	uint8_t red[IMAGE_BUFFER_SIZE] = {0};
+	//Table containing green pixel values of a line
 	uint8_t green[IMAGE_BUFFER_SIZE] = {0};
+	//Table containing blue pixel values of a line
 	uint8_t blue[IMAGE_BUFFER_SIZE] = {0};
 
 	//uint16_t lineWidth = 0;
 
-	movement = MOV_STOP;
-	//bool send_to_computer = true;
+	movement = MOV_STOP; //initialize movement to 0
 
     while(1){
     	//waits until center has been captured
@@ -198,13 +210,14 @@ static THD_FUNCTION(ProcessImage, arg) {
 
 
 		for(uint16_t i = 0 ; i < (2 * IMAGE_BUFFER_SIZE) ; i+=2){
-			//red : extracts first 5bits of the first byte, put them to the right.
+			//red : extracts 5 red bits of the first byte,
         	red[i/2] = ((uint8_t)img_ctr_buff_ptr[i]&0xF8)>>3;
-        	//blue : extracts last 5 bits of the second byte.
+        	//blue : extracts 5 blue bits of the second byte.
         	blue[i/2] = (uint8_t)((uint8_t)img_ctr_buff_ptr[i+1]&0x1F);
         	//green : extracts last 3 bits of the first byte, put them to the left then add the first 3 bits of the second byte shifted to the right.
+        	//in order to get 6 bits for green
         	green[i/2] = (uint8_t)(((uint8_t)img_ctr_buff_ptr[i]&0x07)<<3) + (((uint8_t)img_ctr_buff_ptr[i+1]&0xE0)>>5);
-        	//clr_intensity
+        	//clr_intensity: combination of red, green and blue
         	clr_intensity[i/2]=2*(red[i/2]+blue[i/2])+green[i/2];
 		}
 
@@ -213,16 +226,8 @@ static THD_FUNCTION(ProcessImage, arg) {
 
 		//search for light
 		movement=set_movement_light(red,green,blue);
-
-
-		/*if(send_to_computer){
-			//sends to the computer the image
-			SendUint8ToComputer(clr_intensity, IMAGE_BUFFER_SIZE);
-		}
-		//invert the bool
-		send_to_computer = !send_to_computer;*/
-
     }
+
 }
 
 /*************************END INTERNAL FUNCTIONS**********************************/

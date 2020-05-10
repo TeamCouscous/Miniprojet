@@ -19,17 +19,24 @@ enum{
 	BACK
 };
 
+//List of inclinaison states
+enum{
+	PLANE,
+	UP,
+	DOWN
+};
 //constants for the differents parts of the project
 #define IMAGE_BUFFER_SIZE		640
 #define WIDTH_SLOPE				5
 #define MIN_LINE_WIDTH			40
 #define ROTATION_THRESHOLD		10
 #define ROTATION_COEFF			2
+#define ANGLE_THRESHOLD			0.2
 #define SPEED_THRESHOLD			10
 #define MOV_START				1
 #define MOV_STOP				0
 #define MOV_CONTINUE			2
-#define PROXIMITY_MAX			50
+#define PROXIMITY_MAX			100
 #define MAX_COUNTER				100
 #define MAX_SPEED				800
 #define BACKWARD_SPEED			-200

@@ -34,27 +34,26 @@ static THD_FUNCTION(LedManager, arg) {
 
         if(movement == MOV_STOP)
         {
+        	//The body LED is turned off if the robot has detected a red light and is not moving
         	set_body_led(0);
-        	set_front_led(0);
-        	//set_led(LED5, 1); //set back led (red)
         }
 
         else if(movement == MOV_CONTINUE || movement == MOV_START)
         {
-        	set_front_led(0);
+        	//The body LED is turned on when the robot has detected a green light
 			set_body_led(1);
         }
 
         if(turning == LEFT)
         {
-			set_led(LED7, 2);//toggle
+			set_led(LED7, 2);//toggle the left LED
 			set_led(LED3,0);
 			set_led(LED5,0);
         }
 
         else if(turning==RIGHT)
 		{
-			set_led(LED3,2);//toggle
+			set_led(LED3,2);//toggle the right LED
 			set_led(LED7,0);
 			set_led(LED5,0);
 		}
@@ -67,12 +66,12 @@ static THD_FUNCTION(LedManager, arg) {
         else if(turning==STOP){
         	set_led(LED3, 0);
         	set_led(LED7,0);
-        	set_led(LED5,1);
+        	set_led(LED5,1); //Sets the back led
         }
         else{ //turning==BACK
         	set_led(LED3, 0);
         	set_led(LED7,0);
-        	set_led(LED5,2);
+        	set_led(LED5,2); //Toggle the back led
         }
         chThdSleepUntilWindowed(time, time + MS2ST(250));
     }

@@ -15,9 +15,9 @@
 #include <move_car.h>
 #include <LED_manager.h>
 #include <process_image.h>
-#include <proximity_sensor.h>
 #include <i2c_bus.h>
 #include <sensors/imu.h>
+#include <sensors.h>
 #include "sensors/proximity.h"
 
 messagebus_t bus;

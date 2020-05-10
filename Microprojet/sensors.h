@@ -1,30 +1,38 @@
-#ifndef PROXIMITY_SENSOR_H_
-#define PROXIMITY_SENSOR_H_
+#ifndef SENSORS_H_
+#define SENSORS_H_
 
 /**
  * @brief   Starts the proximity sensor thread
  */
 void proximity_sensor_start(void);
-/**
- * @brief   Returns the boolean that shows if an object is in proximity of the robot
- *
- * @return	true if an object is detected, false if no object is detected
- */
-bool get_proximity_on(void);
-
 
 /**
  * @brief   Starts the imu sensor thread
  */
 void imu_sensor_start(void);
 
-int16_t get_g_compensation(void);
-
-float get_acc_Y(void);
-
+/**
+ * @brief  returns  turn around value
+ * 			0 if nothing is detected on the 4 front proximity sensors
+ * 			LEFT if an object is detected by the right front proximity sensors
+ * 			RIGHT if an object is detected by the left front proximity sensors
+ */
 int8_t get_turn_around(void);
 
+/**
+ * @brief   returns accelerate value
+ * 			true if an object is detected by back proximity sensors
+ * 			false if nothing is detected
+ */
 bool get_accelerate(void);
 
+/**
+ * @brief   returns the incline direction
+ * 			UP if the robot is moving up
+ * 			DOWN if the robot is moving down
+ */
+uint8_t get_inclined(void);
 
-#endif /* PROXIMITY_SENSOR_H_ */
+
+
+#endif /* SENSORS_H_ */

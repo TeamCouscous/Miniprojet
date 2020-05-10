@@ -7,14 +7,13 @@
 #include <sensors/imu.h>
 
 #include <main.h>
-#include "proximity_sensor.h"
 #include <process_image.h>
+#include <sensors.h>
 
-static bool proximity_on;//If proximity_on=1, an object is close to the robot
-static int16_t g_compensation;
-static float acc;
+
 static int8_t turn_around=0;
 static bool accelerate = 0;
+static uint8_t inclined=0;
 
 /***************************INTERNAL FUNCTIONS************************************/
 
@@ -33,7 +32,6 @@ static THD_FUNCTION(ProximitySensor, arg) {
 
     while(1){
     	 time = chVTGetSystemTime();
-    	bool prox_on=0;
 
     	if(get_prox(6) > PROXIMITY_MAX || get_prox(7) > PROXIMITY_MAX)
     	{
@@ -68,16 +66,9 @@ static THD_FUNCTION(ProximitySensor, arg) {
 
 		count_t ++;
 
-
-    	/*for(uint8_t  i=0; i<PROXIMITY_NB_CHANNELS; i++){
-    		if(get_prox(i)> PROXIMITY_MAX ){
-    			prox_on=1;
-    }*/
-    	proximity_on=prox_on;
-
     	chThdSleepUntilWindowed(time, time + MS2ST(10));
 
-    	chprintf((BaseSequentialStream *)&SD3, "turn_around = %d\n accelerate=%d\n", turn_around, accelerate);
+    	//chprintf((BaseSequentialStream *)&SD3, "turn_around = %d\n accelerate=%d\n", turn_around, accelerate);
     }
 }
 
@@ -90,23 +81,52 @@ static THD_FUNCTION(ImuSensor, arg) {
     chRegSetThreadName(__FUNCTION__);
     (void)arg;
     systime_t time;
-    calibrate_gyro();
-    g_compensation = 0;
+    calibrate_acc();
+    uint8_t count_up=0, count_down=0;
+    float angle=0;
 
     while(1){
     	 time = chVTGetSystemTime();
-    	 g_compensation = get_gyro(X_AXIS)-get_gyro_offset(X_AXIS);
-    	 //acc=get_acceleration(Y_AXIS);
-    	 //if(abs(gyro_X) > GYRO_MIN)
+    	 float accel_X=get_acceleration(X_AXIS), accel_Y=get_acceleration(Y_AXIS);
+    	 if(fabs(accel_X) > ANGLE_THRESHOLD || fabs(accel_Y) > ANGLE_THRESHOLD){
+    		 //clock wise angle in rad with 0 being the back of the e-puck2 (Y axis of the IMU)
+    		  angle = atan2(accel_X, accel_Y);
 
-    	//g_compensation += gyro_X/G_COEFF;
-    	 /*
-    	 if(abs(g_compensation) < G_MIN)
-    	 {
-    		 g_compensation = 0;
-    		 calibrate_gyro();
+    		  //if the angle is greater than PI, then it has shifted on the -PI side of the quadrant
+    		  //so we correct it
+    		  if(angle > M_PI){
+    			  angle = -2 * M_PI + angle;
+    		  }
+    	      if(angle >= 0 && angle < M_PI/4){
+    	          count_up++;
+    	          count_down=0;
+    	      }else if(angle >= 3*M_PI/4 && angle < M_PI){
+    	    	  count_up=0;
+    	    	  count_down++;
+    	      }else if(angle >= -M_PI && angle < -3*M_PI/4){
+    	    	  count_up=0;
+    	    	  count_down++;
+    	      }else if(angle >= -M_PI/4 && angle < 0){
+    	    	  count_up++;
+    	    	  count_down=0;
+    	      }
+    	      else{
+    	    	  count_up=0;
+    	    	  count_down=0;
+    	      }
+
+    	      if(count_up> 10){
+    	    	  inclined = UP;
+    	    	  count_up=10;
+    	      }else if(count_down>10){
+    	    	  inclined = DOWN;
+    	    	  count_down=10;
+    	      }else{
+    	    	  inclined=PLANE;
+    	      }
     	 }
-	*/
+
+
 
     	chThdSleepUntilWindowed(time, time + MS2ST(10));
 
@@ -127,17 +147,7 @@ void imu_sensor_start(void){
 	chThdCreateStatic(waImuSensor, sizeof(waImuSensor), NORMALPRIO+1, ImuSensor, NULL);
 }
 
-bool get_proximity_on(void){
-	return proximity_on;
-}
 
-int16_t get_g_compensation(void){
-	return g_compensation;
-}
-
-float get_acc_Y(void){
-	return acc;
-}
 
 int8_t get_turn_around(void){
 	return turn_around;
@@ -147,6 +157,8 @@ bool get_accelerate(void){
 	return accelerate;
 }
 
-
+uint8_t get_inclined(void){
+	return inclined;
+}
 
 /**************************END PUBLIC FUNCTIONS***********************************/
